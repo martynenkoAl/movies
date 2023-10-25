@@ -1,48 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Movies from '../components/Movies';
 import Preloader from '../components/Preloader';
 import { Search } from '../components/Search';
 
 const API_KEY = process.env.REACT_APP_API_KEY;
 
-class Main extends React.Component {
-  state = { movies: [], isLoading: true };
+function Main() {
+  const [movies, setMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  componentDidMount() {
+  useEffect(() => {
     fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=matrix`)
       .then((res) => res.json())
-      .then((data) => this.setState({ movies: data.Search, isLoading: false }))
+      .then((data) => {
+        setMovies(data.Search);
+        setIsLoading(false);
+      })
       .catch((err) => {
         console.error(err);
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       });
-  }
+  }, []);
 
-  seachMovies = (text, type = 'all') => {
-    this.setState({ isLoading: true });
+  const seachMovies = (text, type = 'all') => {
+    setIsLoading(true);
     fetch(
       `https://www.omdbapi.com/?apikey=${API_KEY}&s=${text}${
         type !== 'all' ? `&type=${type}` : ''
       }`
     )
       .then((res) => res.json())
-      .then((data) => this.setState({ movies: data.Search, isLoading: false }))
+      .then((data) => {
+        setMovies(data.Search);
+        setIsLoading(false);
+      })
       .catch((err) => {
         console.error(err);
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       });
   };
 
-  render() {
-    const { movies } = this.state;
-
-    return (
-      <main className='container content'>
-        <Search seachMovies={this.seachMovies} />
-        {!this.state.isLoading ? <Movies movies={movies} /> : <Preloader />}
-      </main>
-    );
-  }
+  return (
+    <main className='container content'>
+      <Search seachMovies={seachMovies} />
+      {!isLoading ? <Movies movies={movies} /> : <Preloader />}
+    </main>
+  );
 }
 
 export { Main };
